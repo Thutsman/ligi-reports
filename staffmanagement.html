@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Management - LIGI Reporting</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="staffmanagement.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="staff-management-container">
+    <div class="page-header">
+        <div class="header-left">
+            <button class="back-button" id="back-btn">&larr; Back to Dashboard</button>
+            <div class="header-info">
+                <h2>Staff Management</h2>
+                <p id="branch-title">Branch Name - <span id="active-count">0</span> Active Staff</p>
+            </div>
+        </div>
+    </div>
+    <div class="main-card">
+        <div class="card-header">
+            <div class="card-title">
+                <span style="font-size: 1.5em;">👥</span>
+                <h3>Manage Your Team</h3>
+            </div>
+            <p class="card-description">Add, edit, and manage staff members for your branch</p>
+        </div>
+        <div class="tab-container">
+            <div class="tab-list">
+                <button class="tab-button active" data-tab="staff-list" id="staff-list-tab">Staff List</button>
+                <button class="tab-button" data-tab="add-staff" id="add-staff-tab">Add Staff</button>
+            </div>
+            <div class="tab-content active" id="staff-list">
+                <div class="list-header">
+                    <h3>Current Staff (<span id="staff-count">0</span> Active)</h3>
+                    <button class="add-button" id="add-new-staff-btn">+ Add New Staff</button>
+                </div>
+                <div class="staff-grid" id="staff-grid"></div>
+            </div>
+            <div class="tab-content" id="add-staff">
+                <form id="staff-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="staff-name">Full Name</label>
+                            <input type="text" id="staff-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="staff-position">Position</label>
+                            <select id="staff-position" name="position" required>
+                                <option value="">Select position</option>
+                                <option>Manager</option>
+                                <option>Assistant Manager</option>
+                                <option>Sales Associate</option>
+                                <option>Cashier</option>
+                                <option>Butcher</option>
+                                <option>Baker</option>
+                                <option>Stock Clerk</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="staff-department">Department</label>
+                            <select id="staff-department" name="department" required>
+                                <option value="">Select department</option>
+                                <option>Grocery</option>
+                                <option>Butchery</option>
+                                <option>Confectionery</option>
+                                <option>General</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="hire-date">Hire Date</label>
+                            <input type="date" id="hire-date" name="hireDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="staff-status">Status</label>
+                            <select id="staff-status" name="status" required>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="submit-button" id="submit-text">Add Staff</button>
+                        <button type="button" class="cancel-button" id="cancel-btn">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="toast hidden" id="toast"><span id="toast-content"></span></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="staffmanagement.js"></script>
+</body>
+</html> 

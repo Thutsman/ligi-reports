@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Business Overview - LIGI Reporting</title>
+    <link rel="stylesheet" href="businessoverview.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<div class="business-overview-container">
+    <div class="page-header">
+        <div class="header-info">
+            <h2>Business Overview</h2>
+            <p id="welcome-message">Welcome back, <span id="user-name">Loading...</span></p>
+        </div>
+        <div class="header-right">
+            <div class="last-updated">
+                <div class="update-label">Last updated</div>
+                <div class="update-time" id="last-update-time">Loading...</div>
+            </div>
+            <button class="logout-button" id="logout-btn">🚪 Logout</button>
+        </div>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <div class="stat-title">Daily Revenue (24 hrs)</div>
+                    <div class="stat-value" id="total-revenue">Loading...</div>
+                </div>
+                <div class="stat-icon-section">
+                    <div class="stat-icon revenue-icon">💰</div>
+                    <div class="stat-change positive" id="revenue-change"><span class="change-text">Loading...</span> <span>📈</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <div class="stat-title">Active Branches</div>
+                    <div class="stat-value" id="active-branches">Loading...</div>
+                </div>
+                <div class="stat-icon-section">
+                    <div class="stat-icon branches-icon">🏪</div>
+                    <div class="stat-change positive" id="branches-change"><span class="change-text">Loading...</span> <span>📈</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <div class="stat-title">Total Staff</div>
+                    <div class="stat-value" id="total-staff">Loading...</div>
+                </div>
+                <div class="stat-icon-section">
+                    <div class="stat-icon staff-icon">👥</div>
+                    <div class="stat-change positive" id="staff-change"><span class="change-text">Loading...</span> <span>📈</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-content">
+                <div>
+                    <div class="stat-title">Inventory Value</div>
+                    <div class="stat-value" id="inventory-value">Loading...</div>
+                </div>
+                <div class="stat-icon-section">
+                    <div class="stat-icon inventory-icon">📦</div>
+                    <div class="stat-change negative" id="inventory-change"><span class="change-text">Loading...</span> <span>📉</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="main-content-grid">
+        <div class="content-card">
+            <div class="card-header">
+                <h3>Branch Performance</h3>
+                <div class="card-description">Revenue and growth by location</div>
+            </div>
+            <div class="card-content branch-list" id="branch-performance-list">
+                Loading...
+            </div>
+        </div>
+        <div class="content-card">
+            <div class="card-header">
+                <h3>Recent Alerts</h3>
+                <div class="card-description">Important notifications</div>
+            </div>
+            <div class="card-content alerts-list" id="alerts-list">
+                Loading...
+            </div>
+        </div>
+    </div>
+    <div class="content-card analytics-card">
+        <div class="card-header">
+            <h3>Analytics Dashboard</h3>
+            <div class="card-description">Detailed business insights</div>
+        </div>
+        <div class="card-content">
+            <div class="tab-container">
+                <div class="tab-list">
+                    <button class="tab-button active" data-tab="revenue-tab">Revenue</button>
+                    <button class="tab-button" data-tab="departments-tab">Branch Performance</button>
+                    <button class="tab-button" data-tab="inventory-tab">Inventory</button>
+                    <button class="tab-button" data-tab="staff-tab">Staff</button>
+                    <button class="tab-button" data-tab="historical-tab">Historical Sales</button>
+                </div>
+                <div class="tab-content active" id="revenue-tab">
+                    <div class="analytics-section">
+                        <h3>Revenue Analytics</h3>
+                        <div>Monthly revenue: <span id="monthly-revenue">Loading...</span></div>
+                        <div id="revenue-chart">Loading...</div>
+                    </div>
+                </div>
+                <div class="tab-content" id="departments-tab">
+                    <div class="analytics-section">
+                        <h3>Branch Sales Contribution</h3>
+                        <div class="departments-grid" id="departments-breakdown">Loading...</div>
+                    </div>
+                </div>
+                <div class="tab-content" id="inventory-tab">
+                    <div class="analytics-section">
+                        <h3>Inventory Overview</h3>
+                        <div>Total inventory value: <span id="inventory-overview-value">Loading...</span></div>
+                        <div id="inventory-overview-alert">Loading... items require restocking</div>
+                    </div>
+                </div>
+                <div class="tab-content" id="staff-tab">
+                    <div class="analytics-section">
+                        <h3>Staff Management</h3>
+                        <div>Total staff: <span id="staff-overview-count">Loading...</span> employees</div>
+                        <div id="staff-overview-hires">Loading... new hires this month</div>
+                    </div>
+                </div>
+                <div class="tab-content" id="historical-tab">
+                    <div class="analytics-section historical-sales-section">
+                        <h3>Branch Historical Sales</h3>
+                        <div class="historical-controls">
+                            <div class="control-group">
+                                <label for="branch-select">Select Branch</label>
+                                <select id="branch-select">
+                                    <option value="">Choose a branch</option>
+                                </select>
+                            </div>
+                            <div class="control-group">
+                                <label for="date-select">Select Date</label>
+                                <input type="date" id="date-select">
+                            </div>
+                            <button class="view-sales-button" id="view-sales-btn">View Sales Data</button>
+                        </div>
+                        <div class="historical-results hidden" id="historical-results"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div>Loading dashboard data...</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="businessoverview.js"></script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Requisition - LIGI Reporting</title>
+    <link rel="stylesheet" href="stock-requisition.css">
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading stock requisition...</div>
+    </div>
+
+    <div class="stock-requisition-container">
+        <!-- Header -->
+        <div class="page-header">
+            <div class="header-left">
+                <button class="back-button" id="back-btn">
+                    <span>←</span>
+                    Back to Dashboard
+                </button>
+            </div>
+            <div class="header-center">
+                <h2>Stock Requisition</h2>
+                <p class="branch-info">
+                    <span id="branch-name">Loading...</span> • <span id="current-date"></span>
+                </p>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <span class="status-dot active"></span>
+                    Ready to Submit
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Requisition Form -->
+            <form id="requisition-form" class="requisition-form">
+                <!-- Items Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span class="section-icon">📦</span>
+                            <h3>Requisition Items</h3>
+                        </div>
+                        <p class="section-description">Add items you need from the central stores</p>
+                    </div>
+                    <div class="section-content">
+                        <div class="items-container" id="items-container">
+                            <!-- Item rows will be injected here -->
+                        </div>
+                        <button type="button" class="add-item-button" id="add-item-btn">
+                            <span class="add-icon">+</span>
+                            Add Another Item
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Additional Information Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <span class="section-icon">📝</span>
+                            <h3>Additional Information</h3>
+                        </div>
+                        <p class="section-description">Optional notes and special instructions</p>
+                    </div>
+                    <div class="section-content">
+                        <div class="form-group">
+                            <label for="notes">Notes & Special Instructions</label>
+                            <textarea id="notes" name="notes" rows="4" placeholder="Enter any special instructions or notes for this requisition..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Section -->
+                <div class="submit-section">
+                    <button type="submit" class="submit-button" id="submit-btn">
+                        <span class="submit-icon">📤</span>
+                        Submit Requisition
+                    </button>
+                </div>
+            </form>
+
+            <!-- Recent Requisitions Section -->
+            <div class="form-section recent-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <span class="section-icon">📋</span>
+                        <h3>Recent Stock Requisitions</h3>
+                    </div>
+                    <p class="section-description">Your recent requisition history</p>
+                </div>
+                <div class="section-content">
+                    <div class="recent-requisitions" id="recent-requisitions">
+                        <div class="loading-state">
+                            <div class="loading-spinner small"></div>
+                            <span>Loading recent requisitions...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal hidden" id="success-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="success-icon">✅</div>
+                <h3>Requisition Submitted Successfully!</h3>
+            </div>
+            <div class="modal-body">
+                <p>Your stock requisition has been submitted and is now pending approval from the stores manager.</p>
+                <p><strong>Requisition ID:</strong> <span id="requisition-id"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn primary" id="submit-another-btn">Submit Another</button>
+                <button class="modal-btn secondary" id="back-to-dashboard-btn">Back to Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notification-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="stock-requisition.js"></script>
+    
+    <!-- Emergency fallback script -->
+    <script>
+        // Force hide loading overlay after 5 seconds if still visible
+        setTimeout(function() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay && !overlay.classList.contains('hidden')) {
+                console.warn('Emergency: Force hiding loading overlay');
+                overlay.style.display = 'none';
+                
+                // Show emergency message
+                const container = document.querySelector('.stock-requisition-container');
+                if (container) {
+                    const emergencyDiv = document.createElement('div');
+                    emergencyDiv.style.cssText = 'background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; margin: 20px; border-radius: 8px; color: #155724;';
+                    emergencyDiv.innerHTML = '<strong>✅ Page Loaded:</strong> The page is now ready. If you encounter any issues, please refresh the page.';
+                    container.insertBefore(emergencyDiv, container.firstChild);
+                }
+            }
+        }, 5000);
+        
+        // Also try to hide overlay when page is fully loaded
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const overlay = document.getElementById('loading-overlay');
+                if (overlay && !overlay.classList.contains('hidden')) {
+                    console.log('Page loaded: hiding loading overlay');
+                    overlay.classList.add('hidden');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

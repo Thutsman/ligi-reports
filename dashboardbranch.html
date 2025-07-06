@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Branch Dashboard | LIGI Reporting</title>
+  <!-- Use the same CSS as businessoverview for unified styling -->
+  <link rel="stylesheet" href="businessoverview.css">
+</head>
+<body>
+  <div class="business-overview-container">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-info">
+        <h2>Branch Dashboard</h2>
+        <p id="welcome-message">Welcome back, <span id="user-name">Loading...</span> • <span id="branch-name">Loading...</span></p>
+      </div>
+      <div class="header-right">
+        <div class="last-updated">
+          <div class="update-label">Last updated</div>
+          <div class="update-time" id="last-update-time">Just now</div>
+        </div>
+        <button class="logout-button" id="logout-btn">🚪 Logout</button>
+    </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="margin-bottom: 32px;">
+      <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+        <button id="eod-btn" class="view-sales-button" style="display: flex; align-items: center; gap: 8px;">
+          📊 Submit EOD Report
+        </button>
+        <button id="stock-btn" class="view-sales-button" style="background: #2563eb; display: flex; align-items: center; gap: 8px;" data-action="stock-requisition">
+          📦 Stock Requisition
+        </button>
+        <button id="manage-staff-btn" class="view-sales-button" style="background: #6b7280; display: flex; align-items: center; gap: 8px;">
+          👥 Manage Staff
+        </button>
+      </div>
+    </div>
+
+    <!-- Metric Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-content">
+          <div>
+            <div class="stat-title">Today's Sales</div>
+            <div class="stat-value" id="todaysSales">$0.00</div>
+          </div>
+          <div class="stat-icon-section">
+            <div class="stat-icon revenue-icon">💰</div>
+            <div class="stat-change positive" id="todaysSalesChange"><span class="change-text">—</span> <span>📈</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <div>
+            <div class="stat-title">Yesterday's Sales</div>
+            <div class="stat-value" id="yesterdaysSales">$0.00</div>
+          </div>
+          <div class="stat-icon-section">
+            <div class="stat-icon revenue-icon">💵</div>
+            <div class="stat-change positive" id="yesterdaysSalesChange"><span class="change-text">—</span> <span>📈</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <div>
+            <div class="stat-title">Active Staff</div>
+            <div class="stat-value" id="activeStaff">0</div>
+          </div>
+          <div class="stat-icon-section">
+            <div class="stat-icon staff-icon">👥</div>
+            <div class="stat-change positive" id="activeStaffChange"><span class="change-text">—</span> <span>🟢</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-content">
+          <div>
+            <div class="stat-title">Pending Requisitions</div>
+            <div class="stat-value" id="pendingRequisitions">0</div>
+          </div>
+          <div class="stat-icon-section">
+            <div class="stat-icon inventory-icon">📦</div>
+            <div class="stat-change negative" id="pendingRequisitionsChange"><span class="change-text">—</span> <span>⏳</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="main-content-grid">
+      <!-- Recent Activities -->
+      <div class="content-card">
+        <div class="card-header">
+          <h3>Recent Activities</h3>
+          <div class="card-description">Branch activity log</div>
+        </div>
+        <div class="card-content" id="recent-activity">
+          <div class="branch-item" style="text-align: center; color: #6b7280;">No recent activities</div>
+        </div>
+      </div>
+      <!-- Quick Reports -->
+      <div class="content-card">
+        <div class="card-header">
+          <h3>Quick Reports</h3>
+          <div class="card-description">Daily, weekly, and monthly summaries</div>
+        </div>
+        <div class="card-content" id="quick-reports">
+          <div class="tab-container">
+            <div class="tab-list">
+              <button class="tab-button active" id="tab-daily" data-tab="daily">Daily</button>
+              <button class="tab-button" id="tab-weekly" data-tab="weekly">Weekly</button>
+              <button class="tab-button" id="tab-monthly" data-tab="monthly">Monthly</button>
+            </div>
+            <div class="tab-content active" id="quick-report-daily">
+              <div class="analytics-section">
+                <div class="quick-report-value">Daily sales: <span id="quickReportDailySales">$0.00</span></div>
+                <div class="quick-report-change" id="quickReportDailyChange">—</div>
+          </div>
+            </div>
+            <div class="tab-content" id="quick-report-weekly">
+              <div class="analytics-section">
+                <div class="quick-report-value">Weekly sales: <span id="quickReportWeeklySales">$0.00</span></div>
+                <div class="quick-report-change" id="quickReportWeeklyChange">—</div>
+              </div>
+            </div>
+            <div class="tab-content" id="quick-report-monthly">
+              <div class="analytics-section">
+                <div class="quick-report-value">Monthly sales: <span id="quickReportMonthlySales">$0.00</span></div>
+                <div class="quick-report-change" id="quickReportMonthlyChange">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EOD Modal -->
+    <div id="eod-modal" class="loading-overlay hidden">
+      <div style="background: white; border-radius: 16px; box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.15); width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; position: relative; padding: 32px;">
+        <button id="close-eod-modal" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 24px; color: #6b7280; cursor: pointer;">&times;</button>
+        <h2 style="text-align: center; margin-bottom: 8px; font-size: 24px; font-weight: 700; color: #1f2937;">End of Day Report</h2>
+        <div style="text-align: center; color: #6b7280; margin-bottom: 32px;" id="eod-branch-date">Loading...</div>
+        <form id="eod-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 32px;">
+            <!-- Sales by Department -->
+            <div>
+              <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Sales by Department</h3>
+              <p style="color: #6b7280; margin-bottom: 16px;">Enter sales for each department</p>
+              <div id="eod-department-fields" style="display: flex; flex-direction: column; gap: 16px;"></div>
+              <div style="margin-top: 16px; font-weight: 700; color: #1f2937;">Total Sales: <span id="eod-total-sales" style="color: #10b981;">$0.00</span></div>
+            </div>
+            <!-- Financial Summary -->
+            <div>
+              <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 8px; color: #1f2937;">Financial Summary</h3>
+              <p style="color: #6b7280; margin-bottom: 16px;">Cash and expense information</p>
+              <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                  <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Total Expenses ($)</label>
+                  <input type="number" step="0.01" min="0" id="eod-expenses" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px;" placeholder="e.g. 900.00" />
+                </div>
+                <div>
+                  <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Cash on Hand ($)</label>
+                  <input type="number" step="0.01" min="0" id="eod-cash" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px;" placeholder="e.g. 500.00" />
+                </div>
+                <div>
+                  <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Discrepancies ($)</label>
+                  <input type="number" step="0.01" min="0" id="eod-discrepancies" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px;" placeholder="Enter any cash discrepancies" />
+                </div>
+                <div>
+                  <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Additional Notes</label>
+                  <textarea id="eod-notes" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px;" rows="3" placeholder="Any additional information or observations"></textarea>
+                </div>
+              </div>
+              <div style="margin-top: 16px; font-weight: 700; color: #1f2937;">Profit/Loss: <span id="eod-profit-loss" style="color: #2563eb;">$0.00</span></div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: flex-end;">
+            <button type="submit" class="view-sales-button" style="display: flex; align-items: center; gap: 8px;">
+              🚀 Submit EOD Report
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay hidden" id="dashboard-loading">
+    <div class="loading-spinner"></div>
+    <div>Loading dashboard data...</div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  <script src="dashboardbranch.js"></script>
+  <script>
+    // Stock Requisition button handler
+    document.addEventListener('DOMContentLoaded', function() {
+      const stockReqButton = document.querySelector('[data-action="stock-requisition"]');
+      if (stockReqButton) {
+        stockReqButton.addEventListener('click', function() {
+          window.location.href = 'stock-requisition.html';
+        });
+      }
+    });
+    
+    // Emergency fallback - force hide loading overlay after 15 seconds
+    setTimeout(function() {
+      const overlay = document.getElementById('dashboard-loading');
+      if (overlay && !overlay.classList.contains('hidden')) {
+        console.warn('Emergency: Force hiding dashboard loading overlay');
+        overlay.classList.add('hidden');
+        
+        // Show emergency message
+        const container = document.querySelector('.business-overview-container');
+        if (container) {
+          const emergencyDiv = document.createElement('div');
+          emergencyDiv.style.cssText = 'background: #d4edda; border: 1px solid #c3e6cb; padding: 15px; margin: 20px; border-radius: 8px; color: #155724;';
+          emergencyDiv.innerHTML = '<strong>✅ Dashboard Loaded:</strong> The dashboard is now ready. If you encounter any issues, please refresh the page.';
+          container.insertBefore(emergencyDiv, container.firstChild);
+        }
+      }
+    }, 15000);
+  </script>
+</body>
+</html>

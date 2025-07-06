@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIGI Reporting System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-bg">
+        <div class="login-card">
+            <h1 class="login-title">Ligi Reporting</h1>
+            <p class="login-subtitle">Multi-Branch Retail App</p>
+            <form id="login-form">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+    <script src="app.js"></script>    
+</body>
+</html>
