@@ -1,6 +1,6 @@
 // Initialize Supabase client
-const supabaseUrl = 'https://rgbgcaxolxxyqvqmmqnh.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnYmdjYXhvbHh4eXF2cW1tcW5oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1ODcwMTEsImV4cCI6MjA2NjE2MzAxMX0.u6H4-hfSjrf4u2lx02hf0L_3LsIvQXDrJBoIUa5Iyb8';
+const supabaseUrl = 'https://veohdpcvkzouuyjpwmis.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlb2hkcGN2a3pvdXV5anB3bWlzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1MjUwNTIsImV4cCI6MjA3NDEwMTA1Mn0.d2MyXV4nl7G3kRLGgekWUioFlXesHXgCn1ezbt812UA';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 class StoresManagement {
