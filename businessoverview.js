@@ -62,6 +62,8 @@ class BusinessOverview {
             await Promise.all([
                 this.loadTotalRevenueToday(),
                 this.loadTotalActiveStaff(),
+                this.loadActiveBranchesCount(),
+                this.loadInventoryValue(),
                 this.loadBusinessStats(),
                 this.loadBranchPerformance(),
                 this.loadAlerts(),
@@ -155,6 +157,90 @@ class BusinessOverview {
         }
     }
 
+    async loadActiveBranchesCount() {
+        try {
+            console.log('🏪 Loading active branches count...');
+
+            // Query all branches with status = 'active'
+            const { data, error } = await this.supabase
+                .from('branches')
+                .select('id, name, status')
+                .eq('status', 'active');
+
+            console.log('🏪 Active branches data:', data);
+            console.log('❌ Branches error:', error);
+
+            if (error) {
+                console.error('Error loading active branches:', error);
+                document.getElementById('active-branches').textContent = 'Error';
+                return;
+            }
+
+            const totalActiveBranches = data ? data.length : 0;
+            document.getElementById('active-branches').textContent = totalActiveBranches.toString();
+            
+            // Update the branches change indicator
+            const branchesChangeElement = document.getElementById('branches-change');
+            if (branchesChangeElement) {
+                const changeText = branchesChangeElement.querySelector('.change-text');
+                if (changeText) {
+                    changeText.textContent = `+${totalActiveBranches}`;
+                }
+            }
+
+            console.log(`🏪 Total active branches: ${totalActiveBranches}`);
+        } catch (error) {
+            console.error('Error in loadActiveBranchesCount:', error);
+            document.getElementById('active-branches').textContent = 'Error';
+        }
+    }
+
+    async loadInventoryValue() {
+        try {
+            console.log('📦 Loading inventory value...');
+
+            // Query total inventory value from inventory_items
+            const { data, error } = await this.supabase
+                .from('inventory_items')
+                .select('current_stock, unit_price');
+
+            console.log('📦 Inventory items data:', data);
+            console.log('❌ Inventory error:', error);
+
+            if (error) {
+                console.error('Error loading inventory value:', error);
+                document.getElementById('inventory-value').textContent = 'Error';
+                return;
+            }
+
+            // Calculate total inventory value
+            let totalInventoryValue = 0;
+            if (data) {
+                totalInventoryValue = data.reduce((total, item) => {
+                    const stock = parseFloat(item.current_stock) || 0;
+                    const price = parseFloat(item.unit_price) || 0;
+                    return total + (stock * price);
+                }, 0);
+            }
+
+            document.getElementById('inventory-value').textContent = `$${totalInventoryValue.toLocaleString()}`;
+            
+            // Update the inventory change indicator (placeholder for now)
+            const inventoryChangeElement = document.getElementById('inventory-change');
+            if (inventoryChangeElement) {
+                const changeText = inventoryChangeElement.querySelector('.change-text');
+                if (changeText) {
+                    changeText.textContent = '0%'; // Could be calculated based on previous day
+                }
+            }
+
+            console.log(`📦 Total inventory value: $${totalInventoryValue.toLocaleString()}`);
+        } catch (error) {
+            console.error('Error in loadInventoryValue:', error);
+            document.getElementById('inventory-value').textContent = 'Error';
+        }
+    }
+
     async loadBusinessStats() {
         // Fetch business statistics from Supabase
         try {
@@ -166,12 +252,11 @@ class BusinessOverview {
             if (stats) {
                 // Note: total-revenue is now handled by loadTotalRevenueToday()
                 // Note: total-staff is now handled by loadTotalActiveStaff()
-                document.getElementById('active-branches').textContent = stats.active_branches || '0';
-                document.getElementById('inventory-value').textContent = `$${stats.inventory_value?.toLocaleString() || '0'}`;
-
-                // Update change indicators (skip revenue-change and staff-change as they're handled above)
-                document.getElementById('branches-change').querySelector('.change-text').textContent = `+${stats.branches_change || '0'}`;
-                document.getElementById('inventory-change').querySelector('.change-text').textContent = `${stats.inventory_change || '0'}%`;
+                // Note: active-branches is now handled by loadActiveBranchesCount()
+                // Note: inventory-value is now handled by loadInventoryValue()
+                
+                // Update change indicators (skip revenue-change, staff-change, branches-change, and inventory-change as they're handled above)
+                // These are now calculated dynamically
             }
         } catch (error) {
             console.error('Error loading business stats:', error);
