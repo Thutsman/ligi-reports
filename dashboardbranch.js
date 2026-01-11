@@ -687,7 +687,39 @@ document.addEventListener('DOMContentLoaded', function() {
           // Set branch and date info
           const branchName = window.currentUserProfile?.branchName || document.getElementById('branch-name').textContent || 'Branch';
           const today = new Date();
-          eodBranchDate.textContent = `${branchName} • ${today.toLocaleDateString()}`;
+          eodBranchDate.textContent = `${branchName}`;
+          
+          // Initialize date selector with today's date
+          const dateSelector = document.getElementById('eod-date-selector');
+          if (dateSelector) {
+              const todayStr = today.toISOString().split('T')[0];
+              
+              // Remove any existing event listeners to prevent duplicates
+              const newDateSelector = dateSelector.cloneNode(true);
+              dateSelector.parentNode.replaceChild(newDateSelector, dateSelector);
+              const freshDateSelector = document.getElementById('eod-date-selector');
+              
+              freshDateSelector.value = todayStr;
+              freshDateSelector.max = todayStr; // Don't allow future dates
+              
+              // Allow dates from up to 30 days ago
+              const thirtyDaysAgo = new Date(today);
+              thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+              freshDateSelector.min = thirtyDaysAgo.toISOString().split('T')[0];
+              
+              // Store reference to date selector for later use
+              window.currentEODDateSelector = freshDateSelector;
+              
+              // Load data when date changes
+              freshDateSelector.addEventListener('change', async () => {
+                  console.log('📅 Date changed to:', freshDateSelector.value);
+                  // Wait a bit to ensure department fields exist
+                  setTimeout(async () => {
+                      await loadEODDataForDate(freshDateSelector.value);
+                  }, 150);
+              });
+          }
+          
           // Fetch departments for this branch from branch_departments
           const branchId = window.currentUserProfile?.branchId;
           console.log('🔍 EOD Modal - Branch ID:', branchId);
@@ -722,15 +754,24 @@ document.addEventListener('DOMContentLoaded', function() {
               eodTotalSales.textContent = '$0.00';
               eodProfitLoss.textContent = '$0.00';
 
-              // Add live calculation listeners
+              // Add live calculation listeners and load existing data
               setTimeout(() => {
+                // Add calculation listeners
                 document.querySelectorAll('.eod-dept-sales').forEach(input => {
                   input.addEventListener('input', updateEODTotals);
                 });
                 document.getElementById('eod-expenses').addEventListener('input', updateEODTotals);
                 document.getElementById('eod-cash').addEventListener('input', updateEODTotals);
                 document.getElementById('eod-discrepancies').addEventListener('input', updateEODTotals);
-              }, 100);
+                
+                // IMPORTANT: Load data for the selected date AFTER departments are created
+                const currentDate = window.currentEODDateSelector ? window.currentEODDateSelector.value : todayStr;
+                console.log('📅 Departments loaded, now loading EOD data for date:', currentDate);
+                console.log('📅 Branch ID:', branchId, 'User ID:', window.currentUserProfile?.userId);
+                loadEODDataForDate(currentDate).catch(err => {
+                  console.error('❌ Error loading EOD data after departments loaded:', err);
+                });
+              }, 150);
           }
       });
       closeEodModal.addEventListener('click', function() {
@@ -754,16 +795,145 @@ document.addEventListener('DOMContentLoaded', function() {
         const profitLoss = totalSales - expenses - discrepancies;
         eodProfitLoss.textContent = `$${profitLoss.toFixed(2)}`;
       }
+      
+      // Function to load existing EOD data for a specific date
+      async function loadEODDataForDate(dateStr) {
+        const branchId = window.currentUserProfile?.branchId;
+        const userId = window.currentUserProfile?.userId;
+        
+        console.log('🔍 loadEODDataForDate called with:', { dateStr, branchId, userId });
+        
+        if (!branchId || !userId) {
+          console.warn('⚠️ Missing branchId or userId:', { branchId, userId });
+          return;
+        }
+        
+        // Ensure date is in YYYY-MM-DD format
+        if (dateStr && !dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          console.warn('⚠️ Date format issue, expected YYYY-MM-DD, got:', dateStr);
+          // Try to convert if it's in a different format
+          const dateObj = new Date(dateStr);
+          if (!isNaN(dateObj.getTime())) {
+            dateStr = dateObj.toISOString().split('T')[0];
+            console.log('✅ Converted date to:', dateStr);
+          }
+        }
+        
+        try {
+          // Query for existing report for this date, branch, and user
+          console.log('🔍 Querying eod_reports for:', { branch_id: branchId, date: dateStr, submitted_by: userId });
+          const { data: existingReport, error } = await supabase
+            .from('eod_reports')
+            .select('*')
+            .eq('branch_id', branchId)
+            .eq('date', dateStr)
+            .eq('submitted_by', userId)
+            .maybeSingle();
+          
+          if (error) {
+            console.error('❌ Error loading EOD report:', error);
+            console.error('Error details:', JSON.stringify(error, null, 2));
+            return;
+          }
+          
+          if (existingReport) {
+            // Populate form with existing data
+            console.log('✅ Found existing EOD report:', existingReport);
+            console.log('📊 Report ID:', existingReport.id);
+            console.log('💰 Total Sales:', existingReport.total_sales);
+            
+            // Load financial summary fields
+            const expensesEl = document.getElementById('eod-expenses');
+            const cashEl = document.getElementById('eod-cash');
+            const discrepanciesEl = document.getElementById('eod-discrepancies');
+            const notesEl = document.getElementById('eod-notes');
+            
+            if (expensesEl) expensesEl.value = existingReport.total_expenses || 0;
+            if (cashEl) cashEl.value = existingReport.cash_on_hand || 0;
+            if (discrepanciesEl) discrepanciesEl.value = existingReport.discrepancies || 0;
+            if (notesEl) notesEl.value = existingReport.notes || '';
+            
+            console.log('✅ Financial summary fields populated');
+            
+            // Load department sales from eod_report_departments table
+            console.log('🔍 Loading department sales for report ID:', existingReport.id);
+            const { data: departmentSales, error: deptError } = await supabase
+              .from('eod_report_departments')
+              .select('department_id, sales_amount')
+              .eq('eod_report_id', existingReport.id);
+            
+            if (deptError) {
+              console.warn('⚠️ Error loading department sales:', deptError);
+              console.warn('This might be normal if the table doesn\'t exist yet or RLS is blocking access');
+              // If table doesn't exist, just show total_sales in a message
+              console.log('💰 Total sales from report:', existingReport.total_sales);
+            } else {
+              console.log('📊 Department sales query result:', departmentSales);
+              
+              if (departmentSales && departmentSales.length > 0) {
+                console.log(`✅ Found ${departmentSales.length} department sales records`);
+                let populatedCount = 0;
+                
+                // Populate department sales fields
+                departmentSales.forEach(deptSale => {
+                  const input = document.querySelector(`.eod-dept-sales[data-dept-id="${deptSale.department_id}"]`);
+                  if (input) {
+                    input.value = parseFloat(deptSale.sales_amount) || 0;
+                    populatedCount++;
+                    console.log(`✅ Populated department ${deptSale.department_id} with $${deptSale.sales_amount}`);
+                  } else {
+                    console.warn(`⚠️ Could not find input for department_id: ${deptSale.department_id}`);
+                  }
+                });
+                
+                console.log(`✅ Populated ${populatedCount} out of ${departmentSales.length} department fields`);
+              } else {
+                console.log('ℹ️ No department sales found for this report (might be an old report)');
+                // No department sales stored yet - this might be an old report
+                // Clear department fields
+                document.querySelectorAll('.eod-dept-sales').forEach(input => { input.value = ''; });
+              }
+            }
+            
+            // Update totals
+            updateEODTotals();
+            console.log('✅ EOD data loaded successfully');
+          } else {
+            // No existing report - clear form
+            console.log('ℹ️ No existing report found for date:', dateStr);
+            console.log('ℹ️ Clearing form for new entry');
+            
+            const expensesEl = document.getElementById('eod-expenses');
+            const cashEl = document.getElementById('eod-cash');
+            const discrepanciesEl = document.getElementById('eod-discrepancies');
+            const notesEl = document.getElementById('eod-notes');
+            
+            if (expensesEl) expensesEl.value = '';
+            if (cashEl) cashEl.value = '';
+            if (discrepanciesEl) discrepanciesEl.value = '';
+            if (notesEl) notesEl.value = '';
+            document.querySelectorAll('.eod-dept-sales').forEach(input => { input.value = ''; });
+            updateEODTotals();
+          }
+        } catch (error) {
+          console.error('❌ Exception in loadEODDataForDate:', error);
+          console.error('Stack trace:', error.stack);
+        }
+      }
 
       // Handle EOD form submission
       if (eodForm) {
         eodForm.onsubmit = async function(e) {
           e.preventDefault();
+          
+          // Get the selected date from date picker
+          const dateSelector = document.getElementById('eod-date-selector');
+          const dateStr = dateSelector ? dateSelector.value : new Date().toISOString().split('T')[0];
+          
           // Gather data
           const branchId = window.currentUserProfile?.branchId || null;
           const userId = window.currentUserProfile?.userId || null;
-          const today = new Date();
-          const dateStr = today.toISOString().split('T')[0];
+          
           let totalSales = 0;
           document.querySelectorAll('.eod-dept-sales').forEach(input => {
             const value = parseFloat(input.value) || 0;
@@ -775,37 +945,122 @@ document.addEventListener('DOMContentLoaded', function() {
           const notes = document.getElementById('eod-notes').value || '';
           const profitLoss = totalSales - expenses - discrepancies;
 
-          // Save to Supabase
-          // Insert summary to eod_reports (always create new row)
-          const { error: eodError } = await supabase.from('eod_reports').insert({
-            branch_id: branchId,
-            date: dateStr,
-            total_sales: totalSales,
-            total_profit: profitLoss,
-            notes: notes,
-            submitted_by: userId,
-            total_expenses: expenses,
-            cash_on_hand: cash,
-            discrepancies: discrepancies,
-            submitted_at: new Date().toISOString()
-          });
+          // Check if report already exists for this date
+          const { data: existingReport } = await supabase
+            .from('eod_reports')
+            .select('id')
+            .eq('branch_id', branchId)
+            .eq('date', dateStr)
+            .eq('submitted_by', userId)
+            .maybeSingle();
+
+          let eodReportId;
+          let eodError;
+          
+          if (existingReport) {
+            // Update existing report
+            eodReportId = existingReport.id;
+            const { error, data } = await supabase
+              .from('eod_reports')
+              .update({
+                total_sales: totalSales,
+                total_profit: profitLoss,
+                notes: notes,
+                total_expenses: expenses,
+                cash_on_hand: cash,
+                discrepancies: discrepancies,
+                submitted_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', existingReport.id)
+              .select('id')
+              .single();
+            eodError = error;
+            if (data) eodReportId = data.id;
+          } else {
+            // Insert new report
+            const { error, data } = await supabase.from('eod_reports').insert({
+              branch_id: branchId,
+              date: dateStr,
+              total_sales: totalSales,
+              total_profit: profitLoss,
+              notes: notes,
+              submitted_by: userId,
+              total_expenses: expenses,
+              cash_on_hand: cash,
+              discrepancies: discrepancies,
+              submitted_at: new Date().toISOString()
+            }).select('id').single();
+            eodError = error;
+            if (data) eodReportId = data.id;
+          }
+          
           if (eodError) {
-            console.log('EOD insert error:', eodError);
-            alert('Supabase error: ' + (eodError.message || JSON.stringify(eodError)));
+            console.log('EOD save error:', eodError);
+            alert('Error saving report: ' + (eodError.message || JSON.stringify(eodError)));
             return;
           }
+          
+          // Save individual department sales
+          if (eodReportId) {
+            // Collect department sales from form
+            const departmentSales = [];
+            document.querySelectorAll('.eod-dept-sales').forEach(input => {
+              const deptId = input.getAttribute('data-dept-id');
+              const salesAmount = parseFloat(input.value) || 0;
+              if (deptId && salesAmount > 0) {
+                departmentSales.push({
+                  eod_report_id: eodReportId,
+                  department_id: parseInt(deptId),
+                  sales_amount: salesAmount
+                });
+              }
+            });
+            
+            if (departmentSales.length > 0) {
+              // Delete existing department sales for this report (if updating)
+              if (existingReport) {
+                await supabase
+                  .from('eod_report_departments')
+                  .delete()
+                  .eq('eod_report_id', eodReportId);
+              }
+              
+              // Insert new department sales
+              const { error: deptError } = await supabase
+                .from('eod_report_departments')
+                .insert(departmentSales);
+              
+              if (deptError) {
+                console.log('Error saving department sales (table may not exist yet):', deptError);
+                // Don't fail the whole submission if department table doesn't exist
+                // This allows graceful degradation
+              } else {
+                console.log('Saved department sales:', departmentSales);
+              }
+            }
+          }
+          
           // Log activity
+          const selectedDate = new Date(dateStr);
+          const today = new Date();
+          const isBackdated = selectedDate.toDateString() !== today.toDateString();
+          
           await supabase.from('activities').insert({
             branch_id: branchId,
             user_id: userId,
             type: 'eod_report',
-            message: 'EOD Report submitted',
+            message: isBackdated 
+              ? `EOD Report ${existingReport ? 'updated' : 'submitted'} for ${selectedDate.toLocaleDateString()}`
+              : `EOD Report ${existingReport ? 'updated' : 'submitted'}`,
             status: 'completed',
             timestamp: new Date().toISOString()
           });
-          alert('EOD Report submitted successfully!');
+          
+          alert(`EOD Report ${existingReport ? 'updated' : 'submitted'} successfully for ${selectedDate.toLocaleDateString()}!`);
           eodModal.classList.add('hidden');
-          // Clear Financial Summary and department sales fields
+          
+          // Clear form fields
           document.getElementById('eod-expenses').value = '';
           document.getElementById('eod-cash').value = '';
           document.getElementById('eod-discrepancies').value = '';
@@ -813,6 +1068,7 @@ document.addEventListener('DOMContentLoaded', function() {
           document.querySelectorAll('.eod-dept-sales').forEach(input => { input.value = ''; });
           eodTotalSales.textContent = '$0.00';
           eodProfitLoss.textContent = '$0.00';
+          
           // Reload recent activities and update sales metrics
           loadRecentActivities();
           updateTodaysSalesMetric();

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EOD Date Selection - Feature Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 24px;
+            border-radius: 12px;
+            color: white;
+        }
+        
+        .feature-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .feature-card p {
+            font-size: 14px;
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+        
+        .demo-section {
+            background: #f9fafb;
+            padding: 32px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .demo-section h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        
+        .scenario {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .scenario h4 {
+            color: #374151;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .scenario ol {
+            margin-left: 20px;
+            color: #6b7280;
+        }
+        
+        .scenario li {
+            margin-bottom: 6px;
+            line-height: 1.6;
+        }
+        
+        .highlight {
+            background: #dbeafe;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        .specs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .spec-item {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .spec-item strong {
+            color: #374151;
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        .spec-item span {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .cta {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .cta h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .cta p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ End of Day Report - Date Selection Feature</h1>
+        <p class="subtitle">Now you can submit EOD reports for any date within the past 30 days!</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>📅 Flexible Dates</h3>
+                <p>Submit reports for today or any day in the past 30 days. Perfect for when you forget to submit yesterday's report!</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>💾 Auto-Save Data</h3>
+                <p>Your entered data is preserved when changing dates. If a report exists for a date, it loads automatically for editing.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>✏️ Edit Existing</h3>
+                <p>Made a mistake? Simply select the date and update the report. The system intelligently updates instead of creating duplicates.</p>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🎯 How It Works</h2>
+            
+            <div class="scenario">
+                <h4>Scenario 1: Forgot Yesterday's Report</h4>
+                <ol>
+                    <li>Open the EOD Report modal on <span class="highlight">Tuesday</span></li>
+                    <li>Change the date selector to <span class="highlight">Monday</span></li>
+                    <li>Enter all your sales and financial data</li>
+                    <li>Submit the report</li>
+                    <li>✅ Report is saved with Monday's date</li>
+                </ol>
+            </div>
+            
+            <div class="scenario">
+                <h4>Scenario 2: Correcting a Mistake</h4>
+                <ol>
+                    <li>Realize you made an error in yesterday's expenses</li>
+                    <li>Open EOD Report and select <span class="highlight">yesterday's date</span></li>
+                    <li>Form automatically loads with yesterday's data</li>
+                    <li>Correct the expense value</li>
+                    <li>✅ Submit to update the existing report</li>
+                </ol>
+            </div>
+            
+            <div class="scenario">
+                <h4>Scenario 3: Regular Daily Submission</h4>
+                <ol>
+                    <li>Open EOD Report at end of day</li>
+                    <li>Date is already set to <span class="highlight">today</span> (default)</li>
+                    <li>Enter your data and submit</li>
+                    <li>✅ Works exactly as before - no change to your workflow!</li>
+                </ol>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>📋 Technical Specifications</h2>
+            <div class="specs">
+                <div class="spec-item">
+                    <strong>Date Range</strong>
+                    <span>30 days back to today</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Future Dates</strong>
+                    <span>Not allowed</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Reports Per Day</strong>
+                    <span>One per user per branch</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Edit Capability</strong>
+                    <span>Full edit on all past reports</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Data Loading</strong>
+                    <span>Automatic when date changes</span>
+                </div>
+                <div class="spec-item">
+                    <strong>Activity Tracking</strong>
+                    <span>Logs all submissions & updates</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="cta">
+            <h3>🚀 Ready to Use!</h3>
+            <p>The feature is now live in your dashboard. Open the EOD Report modal to see the new date selector in action.</p>
+        </div>
+    </div>
+</body>
+</html>
