@@ -1008,7 +1008,8 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.eod-dept-sales').forEach(input => {
               const deptId = input.getAttribute('data-dept-id');
               const salesAmount = parseFloat(input.value) || 0;
-              if (deptId && salesAmount > 0) {
+              // Option A: always store a row per department, even when sales are 0
+              if (deptId) {
                 departmentSales.push({
                   eod_report_id: eodReportId,
                   department_id: parseInt(deptId),

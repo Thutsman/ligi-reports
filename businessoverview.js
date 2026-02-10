@@ -1758,6 +1758,83 @@ class BusinessOverview {
                 // If multiple reports exist for the same date, show the most recent one
                 const eodReport = eodReports[0];
                 const branchName = branchData?.name || 'Unknown Branch';
+
+                // Load department-level sales for this report so the business owner
+                // can see the same breakdown that the branch manager captured
+                let departmentSectionHtml = '';
+                try {
+                    const { data: departmentSales, error: deptError } = await this.supabase
+                        .from('eod_report_departments')
+                        .select(`
+                            department_id,
+                            sales_amount,
+                            departments ( name )
+                        `)
+                        .eq('eod_report_id', eodReport.id);
+
+                    if (deptError) {
+                        console.error('Department sales query error:', deptError);
+                        departmentSectionHtml = `
+                            <div class="eod-section">
+                                <h5>🏬 Sales by Department</h5>
+                                <p class="eod-label">Department breakdown is temporarily unavailable (database error).</p>
+                            </div>
+                        `;
+                    } else if (departmentSales && departmentSales.length > 0) {
+                        const departmentRowsHtml = departmentSales.map(dept => {
+                            const deptName = (dept.departments && dept.departments.name) 
+                                ? dept.departments.name 
+                                : `Department ${dept.department_id}`;
+                            const amount = parseFloat(dept.sales_amount || 0);
+                            return `
+                                <div class="eod-item">
+                                    <span class="eod-label">${deptName} Sales:</span>
+                                    <span class="eod-value">$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                                </div>
+                            `;
+                        }).join('');
+
+                        const departmentsTotal = departmentSales.reduce((sum, dept) => {
+                            return sum + (parseFloat(dept.sales_amount || 0) || 0);
+                        }, 0);
+                        const reportedTotal = parseFloat(eodReport.total_sales || 0) || 0;
+                        const hasMismatch = Math.abs(departmentsTotal - reportedTotal) >= 0.01;
+
+                        departmentSectionHtml = `
+                            <div class="eod-section">
+                                <h5>🏬 Sales by Department</h5>
+                                <div class="eod-grid">
+                                    ${departmentRowsHtml}
+                                </div>
+                                <div class="eod-item" style="margin-top: 16px;">
+                                    <span class="eod-label">Total of Departments:</span>
+                                    <span class="eod-value">$${departmentsTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                                </div>
+                                ${hasMismatch ? `
+                                    <p class="eod-label" style="margin-top: 8px; font-size: 12px; color: #6b7280;">
+                                        Note: Department total differs slightly from reported Total Sales (likely due to historical data or rounding).
+                                    </p>
+                                ` : ''}
+                            </div>
+                        `;
+                    } else {
+                        // Older reports may not have department-level data stored
+                        departmentSectionHtml = `
+                            <div class="eod-section">
+                                <h5>🏬 Sales by Department</h5>
+                                <p class="eod-label">No department breakdown was captured for this report. Only total sales are available.</p>
+                            </div>
+                        `;
+                    }
+                } catch (deptException) {
+                    console.error('Unexpected error loading department sales:', deptException);
+                    departmentSectionHtml = `
+                        <div class="eod-section">
+                            <h5>🏬 Sales by Department</h5>
+                            <p class="eod-label">Unable to load department breakdown at the moment.</p>
+                        </div>
+                    `;
+                }
                 
                 resultsContainer.innerHTML = `
                     <div class="eod-report-header">
@@ -1772,6 +1849,8 @@ class BusinessOverview {
                     </div>
                     
                     <div class="eod-report-content">
+                        ${departmentSectionHtml}
+
                         <!-- Financial Summary -->
                         <div class="eod-section">
                             <h5>💰 Financial Summary</h5>
