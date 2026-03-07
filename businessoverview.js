@@ -2031,14 +2031,36 @@ class BusinessOverview {
             margin: 10,
             filename: filename,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(wrapper).save().catch(err => {
-            console.error('PDF export failed:', err);
-            alert('Failed to generate PDF. Please try again.');
-        });
+        // Must be in the DOM and visible for html2canvas to render correctly.
+        // No z-index / no display:none – position absolute off-screen instead.
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = '-9999px';
+        wrapper.style.top = '0';
+        wrapper.style.width = '800px';
+        wrapper.style.background = '#fff';
+        document.body.appendChild(wrapper);
+
+        const cleanup = () => {
+            if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+        };
+
+        // Small delay to let the browser paint the appended element before capture
+        setTimeout(() => {
+            html2pdf()
+                .set(opt)
+                .from(wrapper)
+                .save()
+                .then(cleanup)
+                .catch(err => {
+                    cleanup();
+                    console.error('PDF export failed:', err);
+                    alert('Failed to generate PDF. Please try again.');
+                });
+        }, 300);
     }
 
     switchTab(tabName) {

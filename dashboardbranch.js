@@ -1138,11 +1138,22 @@ document.addEventListener('DOMContentLoaded', function() {
           var wrapper = document.createElement('div');
           wrapper.innerHTML = reportHtml;
           var el = wrapper.firstElementChild;
-          var opt = { margin: 10, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
-          html2pdf().set(opt).from(el).save().catch(function(err) {
-            console.error('PDF export failed:', err);
-            alert('Failed to generate PDF. Please try again.');
-          });
+          if (!el) return;
+          el.style.position = 'absolute';
+          el.style.left = '-9999px';
+          el.style.top = '0';
+          el.style.width = '800px';
+          el.style.background = '#fff';
+          document.body.appendChild(el);
+          var cleanup = function() { if (el.parentNode) el.parentNode.removeChild(el); };
+          var opt = { margin: 10, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, logging: false }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+          setTimeout(function() {
+            html2pdf().set(opt).from(el).save().then(cleanup).catch(function(err) {
+              cleanup();
+              console.error('PDF export failed:', err);
+              alert('Failed to generate PDF. Please try again.');
+            });
+          }, 300);
         });
       }
   }
