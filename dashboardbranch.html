@@ -187,7 +187,10 @@
               <div style="margin-top: 16px; font-weight: 700; color: #1f2937;">Profit/Loss: <span id="eod-profit-loss" style="color: #2563eb;">$0.00</span></div>
             </div>
           </div>
-          <div style="display: flex; justify-content: flex-end;">
+          <div style="display: flex; justify-content: flex-end; gap: 12px; flex-wrap: wrap;">
+            <button type="button" id="eod-export-pdf-btn" class="view-sales-button" style="display: flex; align-items: center; gap: 8px;">
+              Export PDF
+            </button>
             <button type="submit" class="view-sales-button" style="display: flex; align-items: center; gap: 8px;">
               🚀 Submit EOD Report
             </button>
@@ -205,6 +208,7 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="dashboardbranch.js"></script>
   <script>
     // Stock Requisition button handler

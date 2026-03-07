@@ -1077,6 +1077,74 @@ document.addEventListener('DOMContentLoaded', function() {
           updateQuickReportDailySales(); // Update Quick Reports too
         };
       }
+
+      // EOD Export PDF (branch modal): build report from current form and download
+      var eodExportPdfBtn = document.getElementById('eod-export-pdf-btn');
+      if (eodExportPdfBtn) {
+        eodExportPdfBtn.addEventListener('click', function exportEODReportFromBranchModal() {
+          if (typeof html2pdf === 'undefined') {
+            alert('PDF export is not available. Please refresh the page and try again.');
+            return;
+          }
+          var dateSelector = document.getElementById('eod-date-selector');
+          var dateStr = dateSelector && dateSelector.value ? dateSelector.value : new Date().toISOString().split('T')[0];
+          var branchName = (document.getElementById('eod-branch-date') && document.getElementById('eod-branch-date').textContent) || window.currentUserProfile?.branchName || 'Branch';
+          branchName = String(branchName).replace(/[^\w\s-]/g, '').replace(/\s+/g, '-') || 'Branch';
+          var safeDate = dateStr.replace(/\//g, '-');
+          var filename = 'EOD-Report-' + branchName + '-' + safeDate + '.pdf';
+
+          var totalSales = 0;
+          var departmentRows = [];
+          document.querySelectorAll('#eod-department-fields > div').forEach(function(div) {
+            var label = div.querySelector('label');
+            var input = div.querySelector('.eod-dept-sales');
+            var deptName = label ? label.textContent.replace(/\s*Sales\s*\(\$\)\s*$/, '').trim() : 'Department';
+            var amount = input ? (parseFloat(input.value) || 0) : 0;
+            totalSales += amount;
+            departmentRows.push('<div class="eod-item"><span class="eod-label">' + deptName + ' Sales:</span><span class="eod-value">$' + amount.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>');
+          });
+          var expenses = parseFloat(document.getElementById('eod-expenses').value) || 0;
+          var cash = parseFloat(document.getElementById('eod-cash').value) || 0;
+          var discrepancies = parseFloat(document.getElementById('eod-discrepancies').value) || 0;
+          var notes = (document.getElementById('eod-notes') && document.getElementById('eod-notes').value) || '';
+          var profitLoss = totalSales - expenses - discrepancies;
+          var netRevenue = totalSales - expenses;
+          var profitMargin = totalSales > 0 ? ((profitLoss / totalSales) * 100).toFixed(1) + '%' : '0.0%';
+          var expenseRatio = totalSales > 0 ? ((expenses / totalSales) * 100).toFixed(1) + '%' : '0.0%';
+          var profitLossStr = profitLoss >= 0 ? '$' + profitLoss.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-$' + Math.abs(profitLoss).toLocaleString('en-US', { minimumFractionDigits: 2 });
+          var netRevStr = netRevenue >= 0 ? '+$' + netRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 }) : '-$' + Math.abs(netRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+          var reportHtml = '<div class="eod-pdf-content" style="background:#fff;padding:16px;color:#1f2937;">' +
+            '<div class="eod-report-header"><h4>EOD Report: ' + (document.getElementById('eod-branch-date') ? document.getElementById('eod-branch-date').textContent : branchName) + '</h4>' +
+            '<div class="report-date">' + (new Date(dateStr).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })) + '</div></div>' +
+            '<div class="eod-report-content">' +
+            '<div class="eod-section"><h5>Sales by Department</h5><div class="eod-grid">' + departmentRows.join('') + '</div>' +
+            '<div class="eod-item" style="margin-top:16px;"><span class="eod-label">Total Sales:</span><span class="eod-value">$' + totalSales.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div></div>' +
+            '<div class="eod-section"><h5>Financial Summary</h5><div class="eod-grid">' +
+            '<div class="eod-item"><span class="eod-label">Total Sales:</span><span class="eod-value">$' + totalSales.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>' +
+            '<div class="eod-item"><span class="eod-label">Total Profit:</span><span class="eod-value ' + (profitLoss >= 0 ? '' : 'expense-value') + '">' + profitLossStr + '</span></div>' +
+            '<div class="eod-item"><span class="eod-label">Total Expenses:</span><span class="eod-value expense-value">$' + expenses.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>' +
+            '<div class="eod-item"><span class="eod-label">Net Revenue:</span><span class="eod-value net-revenue">' + netRevStr + '</span></div></div></div>' +
+            '<div class="eod-section"><h5>Payment Methods</h5><div class="eod-grid">' +
+            '<div class="eod-item"><span class="eod-label">Cash on Hand:</span><span class="eod-value">$' + cash.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div>' +
+            '<div class="eod-item"><span class="eod-label">Discrepancies:</span><span class="eod-value ' + (discrepancies !== 0 ? 'expense-value' : '') + '">$' + discrepancies.toLocaleString('en-US', { minimumFractionDigits: 2 }) + '</span></div></div></div>' +
+            '<div class="eod-section"><h5>Financial Analysis</h5><div class="eod-grid">' +
+            '<div class="eod-item"><span class="eod-label">Profit Margin:</span><span class="eod-value">' + profitMargin + '</span></div>' +
+            '<div class="eod-item"><span class="eod-label">Expense Ratio:</span><span class="eod-value">' + expenseRatio + '</span></div></div></div>' +
+            (notes ? '<div class="eod-section"><h5>Notes</h5><div class="eod-notes">' + notes.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div></div>' : '') +
+            '</div>' +
+            '<div style="margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:12px;color:#6b7280;">Generated by LIGI Reporting on ' + new Date().toLocaleString('en-US') + '</div></div>';
+
+          var wrapper = document.createElement('div');
+          wrapper.innerHTML = reportHtml;
+          var el = wrapper.firstElementChild;
+          var opt = { margin: 10, filename: filename, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+          html2pdf().set(opt).from(el).save().catch(function(err) {
+            console.error('PDF export failed:', err);
+            alert('Failed to generate PDF. Please try again.');
+          });
+        });
+      }
   }
   
   // Initialize dashboard with better error handling

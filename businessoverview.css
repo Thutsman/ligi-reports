@@ -610,6 +610,13 @@
     transform: none;
 }
 
+.historical-buttons {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
 .historical-results {
     background: #f9fafb;
     border-radius: 12px;
@@ -709,6 +716,18 @@
     display: flex;
     flex-direction: column;
     gap: 24px;
+}
+
+/* PDF export: ensure content has solid background and readable size when captured */
+.eod-pdf-content {
+    background: #fff !important;
+    min-width: 280px;
+    font-size: 14px;
+}
+
+.eod-pdf-content .eod-report-header {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 
 .eod-section {
